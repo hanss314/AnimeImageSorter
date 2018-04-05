@@ -1,6 +1,5 @@
-﻿import base64
-
-import requests
+﻿import requests
+import base64
 
 
 class ImgurResult:
@@ -26,10 +25,9 @@ class Imgur:
             files = {'image': base64.b64encode(file_.read())}
 
         r = requests.post(cls.ENDPOINT, data=files, headers=headers)
+        print(r, end=' ', flush=True)
 
         json = r.json()
-
-        print(json)
 
         url = json['data'].get('link', '')
         user_remaining = int(r.headers.get('X-RateLimit-UserRemaining', 100))

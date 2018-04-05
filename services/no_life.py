@@ -11,5 +11,6 @@ class NoLife:
             files = {'sharex': file_}
 
             r = requests.post(cls.ENDPOINT, files=files, data=arguments)
+            print(r, end=' ', flush=True)
 
         return r.text

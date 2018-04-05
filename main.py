@@ -153,8 +153,11 @@ class Program:
                     danbooru_result = Booru().get_from_id(danbooru_id)
                 else:
                     print(f'[ Not found ({self.remaining_sauces} remaining) ]')
-            else:
+            elif danbooru_result:
                 print('[ Okay ]')
+                danbooru_result = danbooru_result[0]
+            else:
+                print('[ Not found ]')
 
             if danbooru_result:
                 b_image = BImage(danbooru_result)
