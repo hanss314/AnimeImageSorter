@@ -1,6 +1,7 @@
 ﻿import requests
 import time
-import os
+
+from .prompts import *
 
 
 proxies = {'https': open('keys/proxy.txt').read()} if os.path.exists('keys/proxy.txt') else {}
@@ -20,9 +21,18 @@ class SauceNaoResult:
 
 class SauceNao:
     ENDPOINT = 'https://saucenao.com/search.php'
+    KEY_FILE = 'keys/sauceNaoApiKey.txt'
 
-    def __init__(self, api_key: str):
-        self.api_key = api_key
+    def __init__(self):
+        self.remaining_sauces = 2 ** 16
+        self.remaining_sauces_long = 2 ** 16
+
+        try:
+            with open(self.KEY_FILE) as file_:
+                self.api_key = file_.read()
+        except FileNotFoundError:
+            print(f'\n{MAJOR_PROMPT}SauceNao API key missing. Aborting.')
+            quit()
 
     @classmethod
     def get(cls, url, params=None, retry=240):
@@ -39,17 +49,28 @@ class SauceNao:
         return r
 
     def request(self, url: str) -> SauceNaoResult:
+        # Ratelimits
+        if self.remaining_sauces < 2:
+            print(f'\n{ERROR_PROMPT}Too many Sauces, approaching SauceNao 20 requests per 30s limit.'
+                  f'Waiting 30s.')
+            time.sleep(30)
+        if self.remaining_sauces_long < 2:
+            print(f'\n{ERROR_PROMPT}Too many Sauces, approaching SauceNao 300 requests per 24hrs limit.'
+                  f'Monitor your usage at https://saucenao.com/user.php?page=search-usage and start again.')
+            quit()
+
         params = {'db': '999', 'output_type': '2',
                   'numres': '16', 'api_key': self.api_key, 'url': url}
 
         r = self.get(self.ENDPOINT, params=params)
 
         try:
-            return SauceNaoResult(r.json())
-        except Exception:
-            print('\n==> Invalid result.')
-            return SauceNaoResult({})
+            rtn = SauceNaoResult(r.json())
+        except requests.exceptions.RequestException:
+            print('\n{ERROR_PROMPT}Invalid result.')
+            rtn = SauceNaoResult({})
 
+        self.remaining_sauces = int(rtn.header['short_remaining'])
+        self.remaining_sauces_long = int(rtn.header['long_remaining'])
 
-if __name__ == '__main__':
-    print(SauceNao(open('sauceNaoApiKey.txt').read()).request('https://i.imgur.com/o7JmR2k.jpg'))
+        return rtn

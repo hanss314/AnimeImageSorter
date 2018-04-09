@@ -52,6 +52,6 @@ class Booru:
         r = requests.get(self.ENDPOINT_ID + str(id_) + '.json')
         try:
             return r.json()
-        except Exception:
+        except requests.exceptions.RequestException:
             print(r.text)
             return None
