@@ -25,7 +25,6 @@ class Imgur:
             files = {'image': base64.b64encode(file_.read())}
 
         r = requests.post(cls.ENDPOINT, data=files, headers=headers)
-        print(r, end=' ', flush=True)
 
         json = r.json()
 

@@ -1,13 +1,20 @@
 ﻿import requests
 import time
+import os
+
+
+proxies = {'https': open('keys/proxy.txt').read()} if os.path.exists('keys/proxy.txt') else {}
 
 
 class SauceNaoResult:
     def __init__(self, response: dict):
-        self.header = response.get('header', [])
+        self.header = response.get('header', {
+            'short_remaining': 50,
+            'long_remaining': 50
+        })
         self.results = []
 
-        for result in response['results']:
+        for result in response.get('results', []):
             self.results.append((result['header'], result['data']))
 
 
@@ -19,12 +26,11 @@ class SauceNao:
 
     @classmethod
     def get(cls, url, params=None, retry=240):
-        r = requests.get(url, params=params)
-        print(r, end=' ', flush=True)
+        r = requests.get(url, proxies=proxies, params=params)
 
         if r.status_code == 429:
             ra = int(r.headers.get('Retry-After', retry))
-            print(f'[ {ra}s ]', end=' ', flush=True)
+            print(f'[ Sleeping for {ra}s ]', end=' ', flush=True)
             time.sleep(ra)
             ra *= 2
 
@@ -38,7 +44,11 @@ class SauceNao:
 
         r = self.get(self.ENDPOINT, params=params)
 
-        return SauceNaoResult(r.json())
+        try:
+            return SauceNaoResult(r.json())
+        except Exception:
+            print('\n==> Invalid result.')
+            return SauceNaoResult({})
 
 
 if __name__ == '__main__':

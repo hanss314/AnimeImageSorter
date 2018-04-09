@@ -27,11 +27,10 @@ class Booru:
     @classmethod
     def get(cls, url, params=None, headers=None, retry=2, tries=10):
         r = requests.get(url, params=params, headers=headers)
-        print(r, end=' ', flush=True)
 
         if r.status_code != 200:
             ra = int(r.headers.get('Retry-After', retry))
-            print(f'[ {ra}s ]', end=' ', flush=True)
+            print(f'[ Sleeping for {ra}s ]', end=' ', flush=True)
 
             if tries:
                 time.sleep(retry)
@@ -51,4 +50,8 @@ class Booru:
 
     def get_from_id(self, id_: int) -> dict:
         r = requests.get(self.ENDPOINT_ID + str(id_) + '.json')
-        return r.json()
+        try:
+            return r.json()
+        except Exception:
+            print(r.text)
+            return None

@@ -1,6 +1,6 @@
 # AnimeImageSorter
 
-This is a port of [https://github.com/master117/AnimeImageSorter] to Python along with some added features.
+This is a port of https://github.com/master117/AnimeImageSorter to Python along with some added features.
 
 ## Running
 
