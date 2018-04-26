@@ -292,7 +292,7 @@ class Program:
                         cwd = os.getcwd()
                         os.chdir(target_folder)
                         f = os.path.join('..', '..' if self.sort_by == self.BOTH else '', '.images', filename)
-                        os.symlink(f, filename)
+                        os.link(f, filename)
                         os.chdir(cwd)
                     else:
                         print(ACTION_PROMPT + f'Copying to {target_folder}')
